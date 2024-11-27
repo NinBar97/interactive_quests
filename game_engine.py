@@ -34,7 +34,6 @@ class GameEngine:
             print(f"Exception in start_quest_journey: {e}")
 
     def start_next_quest(self):
-        print("GameEngine.start_next_quest called")  # Debugging statement
         if self.current_quest_index < len(self.quests):
             quest = self.quests[self.current_quest_index]
             print(f"Starting Quest {quest.quest_id}")  # Debugging statement

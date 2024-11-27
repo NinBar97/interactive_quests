@@ -21,7 +21,6 @@ class UserInterface:
         self.style.configure('Error.TLabel', foreground='red')
 
         self.get_player_name()
-        #self.create_main_menu()
 
     def get_player_name(self):
         # Create a frame for the name entry
@@ -32,9 +31,10 @@ class UserInterface:
         title_label = ttk.Label(self.name_frame, text="Math Quest Game", style='Title.TLabel')
         title_label.pack(pady=20)
 
-        tk.Label(self.name_frame, text="Enter your name: ").pack(pady=10)
+        ttk.Label(self.name_frame, text="Enter your name: ", style='TLabel').pack(pady=10)
         self.name_entry = tk.Entry(self.name_frame, textvariable=self.player_name)
         self.name_entry.pack(pady=5)
+
         ttk.Button(self.name_frame, text="Submit", command=self.submit_name).pack(pady=10)
 
     def submit_name(self):
@@ -54,9 +54,9 @@ class UserInterface:
         # Scoreboard at the top
         scoreboard_frame = tk.Frame(self.main_menu_frame)
         scoreboard_frame.pack(side=tk.TOP, fill=tk.X, pady=10)
-        ttk.Label(scoreboard_frame, text="Player:").pack(side=tk.LEFT, padx=5)
+        ttk.Label(scoreboard_frame, text="Player:").pack(side=tk.LEFT, pady=5)
         ttk.Label(scoreboard_frame, textvariable=self.player_name).pack(side=tk.LEFT)
-        ttk.Label(scoreboard_frame, text=" | Points:").pack(side=tk.LEFT, padx=5)
+        ttk.Label(scoreboard_frame, text=" | Points:").pack(side=tk.LEFT, pady=5)
         ttk.Label(scoreboard_frame, textvariable=self.player_points).pack(side=tk.LEFT)
 
         # Main menu buttons
@@ -64,14 +64,12 @@ class UserInterface:
         menu_frame.pack(expand=True)
 
         # Center the buttons vertically and horizontally
-        #button_style = {"font": ("Helvetica", 14), "width": 20}
         button_style = {"width": 20}  # Removed "font" key
         ttk.Button(menu_frame, text="Start The Quest Journey", command=self.start_quest_journey, **button_style).pack(pady=10)
         ttk.Button(menu_frame, text="View Status", command=self.view_status, **button_style).pack(pady=10)
         ttk.Button(menu_frame, text="Exit", command=self.root.quit, **button_style).pack(pady=10)
 
     def start_quest_journey(self):
-        print("UserInterface.start_quest_journey called")  # Debugging statement
         # This method will be connected to the GameEngine
         if self.start_quest_journey_callback:
             self.start_quest_journey_callback()
