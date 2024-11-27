@@ -10,6 +10,7 @@ from tkinter import messagebox
 class GameEngine:
     def __init__(self):
         self.ui = UserInterface()
+        self.ui.game_engine = self  # Set the reference to GameEngine
         self.player = None
         self.current_quest_index = 0
 

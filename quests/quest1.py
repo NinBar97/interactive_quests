@@ -41,23 +41,27 @@ class Quest1(Quest):
         # Display description
         ttk.Label(self.quest_frame, text=self.description, style='Quest.Title.TLabel').pack(pady=20)
 
-        controls_frame = tk.Frame(self.quest_frame)
-        controls_frame.pack(side=tk.LEFT, fill=tk.Y, padx=20)
+        self.controls_frame = tk.Frame(self.quest_frame)
+        self.controls_frame.pack(side=tk.LEFT, fill=tk.Y, padx=20)
 
         # Sliders for sides a and b
-        ttk.Label(controls_frame, text="Adjust side a:", style='Quest.TLabel').pack(pady=5)
-        self.a_slider = tk.Scale(controls_frame, from_=self.a_min_value, to=self.a_max_value, orient=tk.HORIZONTAL, variable=self.a_value, command=self.update_plot, length=200, resolution=0.1)
+        ttk.Label(self.controls_frame, text="Adjust side a:", style='Quest.TLabel').pack(pady=5)
+        self.a_slider = tk.Scale(self.controls_frame, from_=self.a_min_value, to=self.a_max_value, orient=tk.HORIZONTAL, variable=self.a_value, command=self.update_plot, length=200, resolution=0.1)
         self.a_slider.pack(pady=5)
 
-        ttk.Label(controls_frame, text="Adjust side b:", style='Quest.TLabel').pack(pady=5)
-        self.b_slider = tk.Scale(controls_frame, from_=self.b_min_value, to=self.b_max_value, orient=tk.HORIZONTAL, variable=self.b_value, command=self.update_plot, length=200, resolution=0.1)
+        ttk.Label(self.controls_frame, text="Adjust side b:", style='Quest.TLabel').pack(pady=5)
+        self.b_slider = tk.Scale(self.controls_frame, from_=self.b_min_value, to=self.b_max_value, orient=tk.HORIZONTAL, variable=self.b_value, command=self.update_plot, length=200, resolution=0.1)
         self.b_slider.pack(pady=5)
 
-        ttk.Label(controls_frame, text="Enter your answer: ", style='Quest.TLabel').pack(pady=10)
-        self.hypot_entry = tk.Entry(controls_frame ,textvariable=self.c_value)
+        # Entry for the hypotenuse value
+        ttk.Label(self.controls_frame, text="Enter the hypotenuse value:", style='Quest.TLabel').pack(pady=10)
+        self.hypot_entry = tk.Entry(self.controls_frame, textvariable=self.c_value)
         self.hypot_entry.pack(pady=5)
 
-        ttk.Button(controls_frame, text="Answer", command=self.submit_answer, style='Quest.TButton').pack(pady=10)
+        ttk.Button(self.controls_frame, text="Submit Answer", command=self.submit_answer, style='Quest.TButton').pack(pady=10)
+
+        # Initialize message_label to None
+        self.message_label = None
 
         # Plot area
         self.plot_frame = tk.Frame(self.quest_frame)
@@ -65,8 +69,6 @@ class Quest1(Quest):
 
         # Initial plot
         self.create_plot()
-        #self.plot_widget = None
-        #self.update_plot()
 
     def submit_answer(self):
         if self.hypot_entry.get():
@@ -81,18 +83,34 @@ class Quest1(Quest):
         b = self.b_value.get()
         c = sqrt(a**2 + b**2)
 
-        if self.c_value.get() == c:
+        try:
+            user_answer = float(self.hypot_entry.get())
+        except ValueError:
+            # User did not enter a valid number
+            self.display_message("Please enter a valid number.", error=True)
+            return
+
+        # Use a tolerance for comparison
+        if abs(user_answer - c) < 0.01:
             # Answer is correct!
-            print("Correct answer!")
+            self.display_message("Correct answer!", success=True)
             # Inform the GameEngine that the quest is completed
             if self.completion_callback:
                 self.completion_callback(self.quest_id, self.difficulty)
-
             # Hide quest frame and show main menu after a delay
-            self.ui.root.after(3000, self.end_quest)
+            self.ui.root.after(2000, self.end_quest)
         else:
             # Wrong answer!
-            print("Wrong answer!")
+            self.display_message("Wrong answer. Try again.", error=True)
+
+    def display_message(self, message, error=False, success=False):
+        # Remove existing message label if any
+        if self.message_label:
+            self.message_label.destroy()
+        color = 'red' if error else 'green' if success else 'black'
+        self.message_label = ttk.Label(self.controls_frame, text=message, style='Quest.TLabel')
+        self.message_label.configure(foreground=color)
+        self.message_label.pack(pady=5)
 
     def create_plot(self):
         a = self.a_value.get()

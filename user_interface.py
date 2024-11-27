@@ -12,6 +12,7 @@ class UserInterface:
         self.player_name = tk.StringVar()
         self.player_points = tk.IntVar(value=0)
         self.start_quest_journey_callback = None  # Will be set by GameEngine
+        self.game_engine = None  # Will be set by GameEngine
         
         self.style = ttk.Style()
         self.style.theme_use('default')
@@ -62,6 +63,13 @@ class UserInterface:
         # Main menu buttons
         menu_frame = tk.Frame(self.main_menu_frame)
         menu_frame.pack(expand=True)
+
+        # Adjust button text based on current quest index
+        quest_number = self.game_engine.current_quest_index + 1
+        if self.game_engine.current_quest_index == 0:
+            button_text = "Start The Quest Journey"
+        else:
+            button_text = f"Continue to Quest {quest_number}"
 
         # Center the buttons vertically and horizontally
         button_style = {"width": 20}  # Removed "font" key
