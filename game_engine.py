@@ -4,9 +4,7 @@ from player import Player
 from user_interface import UserInterface
 from quests.quest1 import Quest1
 from quests.quest2 import Quest2
-from tkinter import messagebox
-from ui_utils import setup_styles
-
+from quests.quest3 import Quest3
 
 class GameEngine:
     def __init__(self):
@@ -16,7 +14,7 @@ class GameEngine:
         self.current_quest_index = 0
 
         # Initialize quests
-        self.quests = [Quest1(self.ui), Quest2(self.ui)]
+        self.quests = [Quest1(self.ui), Quest2(self.ui), Quest3(self.ui)]
         for quest in self.quests:
             quest.completion_callback = self.quest_completed
 

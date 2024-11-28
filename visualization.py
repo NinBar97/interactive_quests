@@ -1,10 +1,11 @@
 # visualization.py
+
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import tkinter as tk
+import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-
 
 class Visualization:
     @staticmethod
@@ -53,3 +54,80 @@ class Visualization:
 
         # Redraw the canvas
         canvas.draw_idle()
+
+    @staticmethod
+    def create_projectile_plot(parent, target_distance, initial_speed, gravity):
+        fig = plt.Figure(figsize=(6, 4), dpi=100)
+        ax = fig.add_subplot(111)
+        
+        # Plot target
+        target_plot, = ax.plot(target_distance, 0, 'ro', markersize=15, label='Target')
+        
+        # Set plot limits
+        max_height = (initial_speed ** 2) / (2 * gravity)
+        ax.set_xlim(0, target_distance * 1.8)
+        ax.set_ylim(-5, max_height * 1.2)
+        
+        # Ground line
+        ax.axhline(0, color='green', linestyle='--')
+        
+        # Labels and grid
+        ax.set_xlabel('Distance (m)')
+        ax.set_ylabel('Height (m)')
+        ax.set_title('Projectile Motion')
+        ax.grid(True)
+        ax.legend()
+        
+        canvas = FigureCanvasTkAgg(fig, master=parent)
+        canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        canvas.draw()
+        
+        # Initialize the projectile line
+        projectile_line, = ax.plot([], [], 'b-', label='Projectile Path')
+        
+        return canvas, ax, projectile_line, target_plot
+    
+    @staticmethod
+    def update_projectile_plot(ax, target_distance, initial_speed, gravity, x_coords, y_coords):
+        # Clear the axes
+        ax.clear()
+        
+        # Plot target
+        target_plot, = ax.plot(target_distance, 0, 'ro', markersize=15, label='Target')
+        
+        # Ground line
+        ax.axhline(0, color='green', linestyle='--')
+        
+        # Set plot limits
+        max_height = max(y_coords) * 1.2
+        ax.set_xlim(0, target_distance * 1.8)
+        ax.set_ylim(-5, max_height)
+        
+        # Labels and grid
+        ax.set_xlabel('Distance (m)')
+        ax.set_ylabel('Height (m)')
+        ax.set_title('Projectile Motion')
+        ax.grid(True)
+        ax.legend()
+        
+        # Initialize the projectile line
+        projectile_line, = ax.plot([], [], 'b-', label='Projectile Path')
+        
+        return projectile_line, target_plot
+    
+    @staticmethod
+    def animate_projectile(canvas, projectile_line, x_coords, y_coords, index):
+        if index < len(x_coords):
+            x = x_coords[:index]
+            y = y_coords[:index]
+            
+            # Update the projectile line data
+            projectile_line.set_data(x, y)
+            
+            canvas.draw()
+            index += 1
+            # Return the updated index
+            return index
+        else:
+            # Animation is complete
+            return None

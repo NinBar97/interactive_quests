@@ -1,10 +1,10 @@
 # quests/quest1.py
+
+import tkinter as tk
 from quests.quest import Quest
 from math import sqrt
 from visualization import Visualization
-import tkinter as tk
 from tkinter import ttk
-
 
 class Quest1(Quest):
     def __init__(self, ui):

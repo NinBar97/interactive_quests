@@ -1,6 +1,6 @@
 # ui_utils.py
-from tkinter import ttk
 
+from tkinter import ttk
 
 def setup_styles():
     """

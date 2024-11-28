@@ -1,8 +1,8 @@
 # user_interface.py
+
 import tkinter as tk
 from tkinter import ttk
 from ui_utils import setup_styles  # Centralized styling utility
-
 
 class UserInterface:
     def __init__(self):
