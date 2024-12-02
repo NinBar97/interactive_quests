@@ -45,6 +45,9 @@ class Quest2(Quest):
 
         ttk.Button(self.control_frame, text="Submit Answer", command=self.check_answer, style="Quest.TButton").pack(pady=10)
 
+        # Add Skip button
+        ttk.Button(self.control_frame, text="Skip Quest", command=self.skip_quest, style="Quest.TButton").pack(pady=10)
+
          # Initialize message_label to None
         self.message_label = None
 
@@ -73,6 +76,9 @@ class Quest2(Quest):
             self.ui.root.after(2000, self.end_quest)  # Delay ending the quest
         else:
             self.display_message(self.quest_frame, "Incorrect angles. Try again.", error=True)
+
+    def skip_quest(self):
+        self.ui.game_engine.skip_current_quest()
 
     def end_quest(self):
         """

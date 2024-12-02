@@ -5,6 +5,8 @@ from user_interface import UserInterface
 from quests.quest1 import Quest1
 from quests.quest2 import Quest2
 from quests.quest3 import Quest3
+from quests.quest4 import Quest4
+from quests.quest5 import Quest5
 
 class GameEngine:
     def __init__(self):
@@ -14,7 +16,7 @@ class GameEngine:
         self.current_quest_index = 0
 
         # Initialize quests
-        self.quests = [Quest1(self.ui), Quest2(self.ui), Quest3(self.ui)]
+        self.quests = [Quest1(self.ui), Quest2(self.ui), Quest3(self.ui), Quest4(self.ui), Quest5(self.ui)]
         for quest in self.quests:
             quest.completion_callback = self.quest_completed
 
@@ -62,6 +64,18 @@ class GameEngine:
 
         # Proceed to the next quest
         self.start_next_quest()
+
+    def skip_current_quest(self):
+        """
+        Increment the quest index without updating player points.
+        """
+        self.current_quest_index += 1
+
+        if self.current_quest_index < len(self.quests):
+            next_quest = self.quests[self.current_quest_index]
+            next_quest.start()
+        else:
+            self.ui.show_completion_message()
 
 
 if __name__ == "__main__":

@@ -19,6 +19,8 @@ def setup_styles():
     # Buttons
     style.configure('TButton', font=('Helvetica', 14), padding=5)
     style.configure('Quest.TButton', font=('Helvetica', 14, 'bold'), padding=10)
+    # Style for the Skip button
+    style.configure('Skip.TButton', font=('Helvetica', 8), padding=10, foreground='blue')
 
     # Completion labels
     style.configure('Complete.Title.TLabel', font=('Helvetica', 24, 'bold'))

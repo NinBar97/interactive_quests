@@ -53,6 +53,9 @@ class Quest3(Quest):
 
         ttk.Button(self.control_frame, text="Fire Projectile", command=self.fire_projectile, style="Quest.TButton").pack(pady=10)
 
+        # Add Skip button
+        ttk.Button(self.control_frame, text="Skip Quest", command=self.skip_quest, style="Quest.TButton").pack(pady=10)
+
         # Initialize message_label to None
         self.message_label = None
 
@@ -144,6 +147,9 @@ class Quest3(Quest):
         self.message_label = ttk.Label(self.control_frame, text=message, style='Quest.TLabel')
         self.message_label.configure(foreground=color)
         self.message_label.pack(pady=5)
+
+    def skip_quest(self):
+        self.ui.game_engine.skip_current_quest()
 
     def end_quest(self):
         # Do not destroy the quest_frame here

@@ -131,3 +131,89 @@ class Visualization:
         else:
             # Animation is complete
             return None
+
+    @staticmethod
+    def create_single_tank_control_plot(parent, desired_level):
+        fig, axs = plt.subplots(1, 3, figsize=(15, 4), dpi=100)
+        fig.subplots_adjust(wspace=0.3)
+
+        # Left plot: Water tank diagram
+        tank_ax = axs[0]
+        tank_ax.set_title('Water Tank')
+        tank_ax.set_xlim(0, 2)
+        tank_ax.set_ylim(0, 1.5)
+        tank_ax.axis('off')  # Hide axes
+
+        # Draw the tank
+        rect = plt.Rectangle((0.5, 0.0), 1, 1, fill=False)
+        tank_ax.add_patch(rect)
+        # Initialize water level
+        water_patch = plt.Rectangle((0.5, 0.0), 1, 0, facecolor='blue', edgecolor='blue')
+        tank_ax.add_patch(water_patch)
+
+        # Add desired level line in Tank
+        desired_line_tank = tank_ax.hlines(y=desired_level, xmin=0.5, xmax=1.5, colors='red', linestyles='dashed', label='Desired Level')
+
+        # Middle plot: Water level over time
+        level_ax = axs[1]
+        level_ax.set_title('Water Level Over Time')
+        level_ax.set_xlabel('Time (s)')
+        level_ax.set_ylabel('Water Level (m)')
+        level_ax.set_xlim(0, 50)
+        level_ax.set_ylim(0, 1.0)
+        # Line for the tank
+        level_line, = level_ax.plot([], [], label='Tank')
+        desired_level_line = level_ax.axhline(y=desired_level, color='red', linestyle='--', label='Desired Level')
+        level_ax.legend()
+
+        # Right plot: Controller variables over time
+        control_ax = axs[2]
+        control_ax.set_title('Controller Variables Over Time')
+        control_ax.set_xlabel('Time (s)')
+        control_ax.set_ylabel('Value')
+        control_ax.set_xlim(0, 50)
+        # Lines for Kv and errors
+        kv_line, = control_ax.plot([], [], label='Kv (Control Signal)')
+        error_line, = control_ax.plot([], [], label='Error (e)')
+        integral_error_line, = control_ax.plot([], [], label='Integral Error (∫e dt)')
+        derivative_error_line, = control_ax.plot([], [], label='Derivative Error (de/dt)')
+        control_ax.legend()
+    
+        canvas = FigureCanvasTkAgg(fig, master=parent)
+        canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        canvas.draw()
+    
+        # Return the new lines as part of the output
+        return (canvas, fig, tank_ax, level_ax,
+                water_patch, level_line, desired_level_line, control_ax, 
+                kv_line, error_line, integral_error_line, derivative_error_line)
+        
+    @staticmethod
+    def draw_tanks(ax):
+        water_patches = []
+        # Draw three tanks
+        for i in range(3):
+            rect = plt.Rectangle((0.5, i * 1.5), 1, 1, fill=False)
+            ax.add_patch(rect)
+            # Initialize water levels
+            water = plt.Rectangle((0.5, i * 1.5), 1, 0, facecolor='blue', edgecolor='blue')
+            ax.add_patch(water)
+            water_patches.append(water)
+        return water_patches
+
+    @staticmethod
+    def create_mass_spring_damper_plot(parent):
+        fig, ax = plt.subplots(figsize=(8, 4), dpi=100)
+        ax.set_title('Mass-Spring-Damper System')
+        ax.set_xlabel('Time (s)')
+        ax.set_ylabel('Displacement (m)')
+        ax.set_xlim(0, 10)
+        ax.set_ylim(-10, 10)
+        line_position, = ax.plot([], [], label='Position (x)')
+        ax.legend()
+
+        canvas = FigureCanvasTkAgg(fig, master=parent)
+        canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        canvas.draw()
+
+        return canvas, fig, ax, line_position
