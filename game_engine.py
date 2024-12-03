@@ -7,6 +7,8 @@ from quests.quest2 import Quest2
 from quests.quest3 import Quest3
 from quests.quest4 import Quest4
 from quests.quest5 import Quest5
+from quests.quest6 import Quest6
+from quests.quest7 import Quest7
 
 class GameEngine:
     def __init__(self):
@@ -16,7 +18,8 @@ class GameEngine:
         self.current_quest_index = 0
 
         # Initialize quests
-        self.quests = [Quest1(self.ui), Quest2(self.ui), Quest3(self.ui), Quest4(self.ui), Quest5(self.ui)]
+        #self.quests = [Quest1(self.ui), Quest2(self.ui), Quest3(self.ui), Quest4(self.ui), Quest5(self.ui), Quest6(self.ui), Quest7(self.ui)]
+        self.quests = [Quest1(self.ui), Quest2(self.ui), Quest3(self.ui), Quest4(self.ui), Quest5(self.ui), Quest6(self.ui)]
         for quest in self.quests:
             quest.completion_callback = self.quest_completed
 

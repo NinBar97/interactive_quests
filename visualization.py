@@ -202,18 +202,142 @@ class Visualization:
         return water_patches
 
     @staticmethod
-    def create_mass_spring_damper_plot(parent):
-        fig, ax = plt.subplots(figsize=(8, 4), dpi=100)
-        ax.set_title('Mass-Spring-Damper System')
-        ax.set_xlabel('Time (s)')
-        ax.set_ylabel('Displacement (m)')
-        ax.set_xlim(0, 10)
-        ax.set_ylim(-10, 10)
-        line_position, = ax.plot([], [], label='Position (x)')
-        ax.legend()
+    def create_mass_spring_damper_plots(parent):
+        # Create a figure with multiple subplots
+        fig = plt.Figure(figsize=(12, 6), dpi=100)
+        
+        # Grid specification for subplots
+        gs = fig.add_gridspec(2, 2)
+
+        # Subplot for trolley animation
+        ax_animation = fig.add_subplot(gs[0, 0])
+        ax_animation.set_xlim(-10, 20)
+        ax_animation.set_ylim(-5, 5)
+        ax_animation.axis('off')  # Hide axes for animation
+        # Draw the fixed spring origin
+        ax_animation.plot([-10, -5], [0, 0], color='black', linewidth=2)
+        # Initialize trolley and spring lines
+        trolley, = ax_animation.plot([], [], 's', markersize=20, color='blue')
+        spring_line, = ax_animation.plot([], [], color='black', linewidth=2)
+        # Target position indicator
+        target_marker = ax_animation.axvline(x=10, color='red', linestyle='--', label='Target Position')
+
+        # Subplot for displacement over time
+        ax_position = fig.add_subplot(gs[0, 1])
+        ax_position.set_title('Displacement Over Time')
+        ax_position.set_xlabel('Time (s)')
+        ax_position.set_ylabel('Displacement (m)')
+        ax_position.set_xlim(0, 10)
+        ax_position.set_ylim(-15, 15)
+        line_position, = ax_position.plot([], [], label='Position (x)')
+        ax_position.legend()
+
+        # Subplot for velocity vs displacement (phase plot)
+        ax_phase = fig.add_subplot(gs[1, :])
+        ax_phase.set_title('Velocity vs. Displacement (Phase Plot)')
+        ax_phase.set_xlabel('Displacement (m)')
+        ax_phase.set_ylabel('Velocity (m/s)')
+        ax_phase.set_xlim(-15, 15)
+        ax_phase.set_ylim(-15, 15)
+        line_phase, = ax_phase.plot([], [], label='Phase Trajectory')
+        ax_phase.legend()
 
         canvas = FigureCanvasTkAgg(fig, master=parent)
         canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
         canvas.draw()
 
-        return canvas, fig, ax, line_position
+        return (canvas, fig, ax_animation, trolley, spring_line, ax_position, line_position,
+                ax_phase, line_phase)
+
+    @staticmethod
+    def create_inverted_pendulum_plot(parent):
+        fig = plt.Figure(figsize=(10, 6), dpi=100)
+        gs = fig.add_gridspec(2, 2)
+
+        # Animation subplot
+        ax_animation = fig.add_subplot(gs[:, 0])
+        ax_animation.set_xlim(-2, 2)
+        ax_animation.set_ylim(-0.5, 1.5)
+        ax_animation.set_aspect('equal')
+        ax_animation.axis('off')
+
+        # Draw ground
+        ax_animation.plot([-2, 2], [0, 0], 'k')
+
+        # Initialize cart
+        cart_width = 0.4
+        cart_height = 0.2
+        cart_patch = plt.Rectangle((-cart_width/2, 0), cart_width, cart_height, fill=True, color='blue')
+        ax_animation.add_patch(cart_patch)
+
+        # Initialize pendulum
+        pendulum_line, = ax_animation.plot([], [], lw=2, color='red')
+
+        # Subplot for pendulum angle over time
+        ax_angle = fig.add_subplot(gs[0, 1])
+        ax_angle.set_title('Pendulum Angle Over Time')
+        ax_angle.set_xlabel('Time (s)')
+        ax_angle.set_ylabel('Angle (rad)')
+        line_angle, = ax_angle.plot([], [], label='θ(t)')
+        ax_angle.legend()
+
+        # Subplot for control force over time
+        ax_force = fig.add_subplot(gs[1, 1])
+        ax_force.set_title('Control Force Over Time')
+        ax_force.set_xlabel('Time (s)')
+        ax_force.set_ylabel('Force (N)')
+        line_force, = ax_force.plot([], [], label='u(t)')
+        ax_force.legend()
+
+        canvas = FigureCanvasTkAgg(fig, master=parent)
+        canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        canvas.draw()
+
+        return (canvas, fig, ax_animation, cart_patch, pendulum_line, ax_angle, line_angle, ax_force, line_force)
+    
+
+    @staticmethod
+    def create_loss_accuracy_plots(parent):
+        fig, axs = plt.subplots(2, 2, figsize=(12, 8), dpi=100)
+        fig.subplots_adjust(wspace=0.3, hspace=0.3)
+
+        # Training Loss
+        ax_train_loss = axs[0, 0]
+        ax_train_loss.set_title('Training Loss')
+        ax_train_loss.set_xlabel('Epoch')
+        ax_train_loss.set_ylabel('Loss')
+        line_train_loss, = ax_train_loss.plot([], [], label='Training Loss', color='blue')
+        ax_train_loss.legend()
+
+        # Validation Loss
+        ax_val_loss = axs[0, 1]
+        ax_val_loss.set_title('Validation Loss')
+        ax_val_loss.set_xlabel('Epoch')
+        ax_val_loss.set_ylabel('Loss')
+        line_val_loss, = ax_val_loss.plot([], [], label='Validation Loss', color='orange')
+        ax_val_loss.legend()
+
+        # Training Accuracy
+        ax_train_acc = axs[1, 0]
+        ax_train_acc.set_title('Training Accuracy')
+        ax_train_acc.set_xlabel('Epoch')
+        ax_train_acc.set_ylabel('Accuracy (%)')
+        line_train_acc, = ax_train_acc.plot([], [], label='Training Accuracy', color='green')
+        ax_train_acc.legend()
+
+        # Validation Accuracy
+        ax_val_acc = axs[1, 1]
+        ax_val_acc.set_title('Validation Accuracy')
+        ax_val_acc.set_xlabel('Epoch')
+        ax_val_acc.set_ylabel('Accuracy (%)')
+        line_val_acc, = ax_val_acc.plot([], [], label='Validation Accuracy', color='red')
+        ax_val_acc.legend()
+
+        canvas = FigureCanvasTkAgg(fig, master=parent)
+        canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        canvas.draw()
+
+        return (canvas, fig, ax_train_loss, line_train_loss,
+                ax_val_loss, line_val_loss,
+                ax_train_acc, line_train_acc,
+                ax_val_acc, line_val_acc)

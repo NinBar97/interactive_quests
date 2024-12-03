@@ -10,11 +10,12 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 class Quest5(Quest):
     def __init__(self, ui):
-        super().__init__(quest_id=5, description="Explore the mass-spring-damper system.", difficulty=5, ui=ui)
+        super().__init__(quest_id=5, description="Adjust parameters so the mass stops at the target position.", difficulty=5, ui=ui)
         self.mass = tk.DoubleVar(value=1.0)      # Mass (m)
         self.spring_const = tk.DoubleVar(value=1.0)  # Spring constant (K_s)
         self.damping_coeff = tk.DoubleVar(value=0.1)  # Damping coefficient (K_d)
-        self.initial_displacement = tk.DoubleVar(value=1.0)  # Initial displacement
+        self.initial_displacement = tk.DoubleVar(value=0.0)  # Initial displacement
+        self.target_position = 10.0  # Target position where the mass should stop
         self.time_elapsed = 0.0
         self.simulation_running = False
         self.animation = None
@@ -52,8 +53,10 @@ class Quest5(Quest):
         self.damping_slider.pack(pady=5)
 
         ttk.Label(self.control_frame, text="Initial Displacement (x0):", style="Quest.TLabel").pack(pady=5)
-        self.displacement_slider = tk.Scale(self.control_frame, from_=-5.0, to=5.0, orient=tk.HORIZONTAL, variable=self.initial_displacement, length=200, resolution=0.1)
+        self.displacement_slider = tk.Scale(self.control_frame, from_=-5.0, to=15.0, orient=tk.HORIZONTAL, variable=self.initial_displacement, length=200, resolution=0.1)
         self.displacement_slider.pack(pady=5)
+
+        ttk.Label(self.control_frame, text=f"Target Position: {self.target_position} m", style="Quest.TLabel").pack(pady=5)
 
         ttk.Button(self.control_frame, text="Start Simulation", command=self.start_simulation, style="Quest.TButton").pack(pady=10)
         ttk.Button(self.control_frame, text="Reset Simulation", command=self.reset_simulation, style="Quest.TButton").pack(pady=10)
@@ -70,7 +73,8 @@ class Quest5(Quest):
         self.create_plot()
 
     def create_plot(self):
-        self.canvas, self.fig, self.ax_position, self.line_position = Visualization.create_mass_spring_damper_plot(self.plot_frame)
+        (self.canvas, self.fig, self.ax_animation, self.trolley, self.spring_line,
+         self.ax_position, self.line_position, self.ax_phase, self.line_phase) = Visualization.create_mass_spring_damper_plots(self.plot_frame)
 
     def start_simulation(self):
         if self.simulation_running:
@@ -82,10 +86,18 @@ class Quest5(Quest):
         self.positions = [self.initial_displacement.get()]
         self.velocities = [0.0]  # Initial velocity is zero
 
-        # Reset the plot
+        # Reset the plots
         self.line_position.set_data([], [])
         self.ax_position.set_xlim(0, 10)
-        self.ax_position.set_ylim(-10, 10)
+        self.ax_position.set_ylim(-15, 15)
+        self.line_phase.set_data([], [])
+        self.ax_phase.set_xlim(-15, 15)
+        self.ax_phase.set_ylim(-15, 15)
+        # Reset trolley and spring
+        initial_x = self.positions[0]
+        self.trolley.set_data([initial_x], [0])
+        self.spring_line.set_data([], [])
+
         self.simulation_running = True
 
         # Start the animation
@@ -101,10 +113,17 @@ class Quest5(Quest):
         self.positions = [self.initial_displacement.get()]
         self.velocities = [0.0]
 
-        # Reset the plot
+        # Reset the plots
         self.line_position.set_data([], [])
         self.ax_position.set_xlim(0, 10)
-        self.ax_position.set_ylim(-10, 10)
+        self.ax_position.set_ylim(-15, 15)
+        self.line_phase.set_data([], [])
+        self.ax_phase.set_xlim(-15, 15)
+        self.ax_phase.set_ylim(-15, 15)
+        # Reset trolley and spring
+        initial_x = self.positions[0]
+        self.trolley.set_data([initial_x], [0])
+        self.spring_line.set_data([], [])
 
         # Remove any existing message
         if self.message_label:
@@ -132,10 +151,16 @@ class Quest5(Quest):
         x = self.positions[-1]
         v = self.velocities[-1]
 
-        # Differential equations
-        # Using the equation: m * a + K_d * v + K_s * x = 0
-        # Acceleration: a = (-K_d * v - K_s * x) / m
-        a = (-K_d * v - K_s * x) / m
+        # Shift the reference to start at initial position
+        x_shifted = x - self.initial_displacement.get()
+
+        # Target position relative to initial position
+        x_target = self.target_position - self.initial_displacement.get()
+
+        # Apply external force to move towards the target position
+        # For simplicity, we can model the target position as an equilibrium point of the spring
+        # Modify the spring force to be: F_spring = -K_s * (x - x_target)
+        a = (-K_d * v - K_s * (x - x_target)) / m
 
         # Update velocity and position using Euler's method
         v_new = v + a * dt
@@ -149,10 +174,26 @@ class Quest5(Quest):
         self.positions.append(x_new)
         self.velocities.append(v_new)
 
-        # Update plot
+        # Update trolley animation
+        self.trolley.set_data([x_new], [0])  # Trolley moves along x-axis at y=0
+        # Update spring line
+        spring_start = -10  # Fixed point of the spring
+        spring_end = x_new  # Current position of the trolley
+        num_coils = 20
+        coil_amplitude = 0.2
+        spring_x = np.linspace(spring_start, spring_end, num_coils * 10)
+        spring_y = coil_amplitude * np.sin(2 * np.pi * num_coils * (spring_x - spring_start) / (spring_end - spring_start + 0.1))
+        self.spring_line.set_data(spring_x, spring_y)
+
+        # Update displacement over time plot
         self.line_position.set_data(self.times, self.positions)
         self.ax_position.set_xlim(0, max(10, t_new))
         self.ax_position.set_ylim(min(self.positions) - 1, max(self.positions) + 1)
+
+        # Update phase plot
+        self.line_phase.set_data(self.positions, self.velocities)
+        self.ax_phase.set_xlim(min(self.positions) - 1, max(self.positions) + 1)
+        self.ax_phase.set_ylim(min(self.velocities) - 1, max(self.velocities) + 1)
 
         # Redraw canvas
         self.canvas.draw()
@@ -165,16 +206,18 @@ class Quest5(Quest):
             self.check_success()
 
     def check_success(self):
-        # Determine if the system is critically damped
-        m = self.mass.get()
-        K_s = self.spring_const.get()
-        K_d = self.damping_coeff.get()
-        critical_damping = 2 * np.sqrt(m * K_s)
-        if abs(K_d - critical_damping) < 0.1:
-            self.display_message("Success! You've achieved critical damping.", success=True)
+        # Check if the mass has stopped at the target position within a tolerance
+        final_velocity = self.velocities[-1]
+        final_position = self.positions[-1]
+        position_error = abs(final_position - self.target_position)
+        velocity_threshold = 0.05  # Threshold for considering the mass as stopped
+        position_tolerance = 0.1   # Acceptable distance from target position
+
+        if abs(final_velocity) < velocity_threshold and position_error < position_tolerance:
+            self.display_message("Success! The mass has stopped at the target position.", success=True)
             self.ui.root.after(2000, self.end_quest)
         else:
-            self.display_message("Try adjusting K_d to achieve critical damping.", error=True)
+            self.display_message("Adjust parameters to stop the mass at the target position.", error=True)
 
     def display_message(self, message, error=False, success=False):
         # Remove existing message label if any
