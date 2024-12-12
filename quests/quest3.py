@@ -70,7 +70,6 @@ class Quest3(Quest):
         self.canvas, self.ax, self.projectile_line, self.target_plot = Visualization.create_projectile_plot(
             self.plot_frame, self.target_distance.get(), self.initial_speed.get(), self.gravity)
 
-
     def fire_projectile(self):
         if self.animation_running:
             return  # Prevent firing multiple times at once
